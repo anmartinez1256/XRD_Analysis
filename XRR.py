@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[8]:
-
 
 import numpy as np
 import pandas as pd
@@ -10,9 +8,6 @@ import matplotlib.pyplot as plt
 from scipy.optimize import minimize 
 from scipy.signal import argrelmax
 import itertools
-
-
-# In[168]:
 
 
 def read_data(txt_file, connect = False):
@@ -52,18 +47,10 @@ def read_data(txt_file, connect = False):
                 break
     return (np.array(angle), normalize(counts))
 
-
-# In[169]:
-
-
 def normalize(data):
     q = max(data)
     v = map(lambda x: x/max(data), data)
     return np.array(list(v))
-
-
-# In[170]:
-
 
 def plot_data(angle, counts, maxima = None):
     plt.title("Intensity vs Angle")
@@ -73,17 +60,9 @@ def plot_data(angle, counts, maxima = None):
     if maxima is not None:
         plt.scatter(angle[maxima], counts[maxima])
 
-
-# In[171]:
-
-
 def find_extrema(counts, orde):
     a = argrelmax(counts, order = orde)[0]
     return a
-
-
-# In[181]:
-
 
 def calculate_thickness(angle, maxima):
 
@@ -105,8 +84,6 @@ def calculate_thickness(angle, maxima):
     print(thickness)
 
 
-# In[182]:
-
 if __name__ == "__main__":
     file_path = input("TYPE FILE PATH HERE: ")
     angle, counts = read_data(file_path)
@@ -116,9 +93,6 @@ if __name__ == "__main__":
     #plot_data(angle, counts, maxima)
     #plot_data(angle_c, counts_c, maxima_c)
     calculate_thickness(angle_c, maxima_c)
-
-
-# In[ ]:
 
 
 
