@@ -1,14 +1,16 @@
 #!/usr/bin/env python
 # coding: utf-8
+import os
+# In[8]:
 
-
+import LinearRegressionModule
+import math
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from scipy.optimize import minimize 
-from scipy.signal import argrelmax
-import itertools
+from scipy.signal import argrelmax, savgol_filter
 
+# In[168]:
 
 def read_data(txt_file, connect = False):
     txt_file = open(txt_file, "r")
@@ -47,10 +49,18 @@ def read_data(txt_file, connect = False):
                 break
     return (np.array(angle), normalize(counts))
 
+
+# In[169]:
+
+
 def normalize(data):
     q = max(data)
     v = map(lambda x: x/max(data), data)
     return np.array(list(v))
+
+
+# In[170]:
+
 
 def plot_data(angle, counts, maxima = None):
     plt.title("Intensity vs Angle")
@@ -59,40 +69,53 @@ def plot_data(angle, counts, maxima = None):
     plt.plot(angle, counts)
     if maxima is not None:
         plt.scatter(angle[maxima], counts[maxima])
+    plt.show()
+    
+
+
+# In[171]:
+
 
 def find_extrema(counts, orde):
     a = argrelmax(counts, order = orde)[0]
     return a
 
+
+# In[181]:
+
+
 def calculate_thickness(angle, maxima):
-
-    def equation(m_tuple, n_tuple):
-        wavelength = 0.154187
-        m, theta_m = m_tuple
-        n, theta_n = n_tuple
-        d = (wavelength/2) * (m-n)/(np.sin(theta_m/2) - np.sin(theta_n/2))
-        return d
+    #get critical angle
+    m = [i**2 for i in list(range(len(maxima)))]
+    sq_angle = [(math.radians(angle[i]))**2 for i in maxima]
+    parameters = LinearRegressionModule.optimize_parameters(m, sq_angle)
     
-    #get m and angles
-    m = list(range(len(maxima)))
-    diffraction_fringes = list(zip(m, angle[maxima]))
+    #FOR PLOTTING
+    lin_plot = lambda z: parameters[0] * z + parameters[1]
+    lin_approx = [lin_plot(i) for i in m]
+    plt.plot(m, lin_approx)
+    plt.scatter(m, sq_angle)
+    plt.show()
     
-    thickness = []
-    for i, m in enumerate(diffraction_fringes[:-1]):
-        n = diffraction_fringes[i+1]
-        thickness.append(equation(m, n))
-    print(thickness)
-
+    wavelength = 1.5406 #Angstroms
+    slope = parameters[0]
+    thickness = wavelength/(2 * np.sqrt(slope))
+    return thickness
+    
+# In[182]:
 
 if __name__ == "__main__":
     file_path = input("TYPE FILE PATH HERE: ")
-    angle, counts = read_data(file_path)
-    angle_c, counts_c = read_data(file_path, True)
-    maxima = find_extrema(counts, 10)
-    maxima_c = find_extrema(counts_c, 10)
+    #angle, counts = read_data(file_path)
+    angle_c, counts_c = read_data(file_path)
+    #maxima = find_extrema(counts, 10)
+    maxima_c = find_extrema(counts_c, 4)
     #plot_data(angle, counts, maxima)
-    #plot_data(angle_c, counts_c, maxima_c)
-    calculate_thickness(angle_c, maxima_c)
+    plot_data(angle_c, counts_c, maxima_c)
+    print(calculate_thickness(angle_c, maxima_c))
+
+
+# In[ ]:
 
 
 
